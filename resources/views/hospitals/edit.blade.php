@@ -11,7 +11,7 @@
           @csrf @method('PUT')
 
           <div class="mb-3">
-            <label class="form-label fw-semibold">Nama</label>
+            <label class="form-label fw-semibold" style="font-size: 14px;">Nama</label>
             <input type="text" name="nama" class="form-control @error('nama') is-invalid @enderror"
               placeholder="Masukkan nama rumah sakit" value="{{ old('nama', $hospital->nama) }}" style="font-size: 14px;">
             @error('nama') <div class="invalid-feedback">{{ $message }}</div> @enderror
