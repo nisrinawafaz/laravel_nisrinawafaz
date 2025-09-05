@@ -16,8 +16,7 @@ class Patient extends Model
         'hospital_id',
     ];
 
-    // Relasi: Pasien milik satu Rumah Sakit
-    public function rumahSakit()
+    public function hospital()
     {
         return $this->belongsTo(Hospital::class);
     }

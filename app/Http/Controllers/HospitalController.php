@@ -5,18 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Hospital;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use Illuminate\Database\QueryException;
 
 class HospitalController extends Controller
 {
     public function index()
     {
-        $hospitals = Hospital::all();
-        return view('hospital.index', compact('hospitals'));
+        $hospitals = Hospital::paginate(10);
+        return view('hospitals.index', compact('hospitals'));
     }
 
     public function create()
     {
-        return view('hospital.create');
+        return view('hospitals.create');
     }
 
     public function store(Request $request)
@@ -24,8 +26,13 @@ class HospitalController extends Controller
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'telepon' => 'required|string|max:15',
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('hospitals', 'email'),
+            ],
+            'telepon' => ['required', 'digits_between:8,15'],
         ], [
             'nama.required' => 'Nama pasien wajib diisi!',
             'nama.string' => 'Nama pasien harus berupa teks.',
@@ -38,10 +45,10 @@ class HospitalController extends Controller
             'email.required' => 'Email pasien wajib diisi!',
             'email.email' => 'Format email tidak valid.',
             'email.max' => 'Email pasien maksimal 255 karakter.',
+            'email.unique' => 'Email ini sudah digunakan.',
 
             'telepon.required' => 'Nomor telepon wajib diisi!',
-            'telepon.string' => 'Nomor telepon harus berupa teks/angka.',
-            'telepon.max' => 'Nomor telepon maksimal 15 karakter.',
+            'telepon.digits_between' => 'Nomor telepon harus berupa angka, antara 8 sampai 15 digit.',
         ]);
 
         if ($validator->fails()) {
@@ -52,12 +59,12 @@ class HospitalController extends Controller
 
         Hospital::create($validator->validated());
 
-        return redirect()->route('hospitals.index')->with('success', 'Data Rumah Sakit berhasil ditambahkan');
+        return redirect()->route('hospitals.index')->with('ok', 'Data Rumah Sakit berhasil ditambahkan');
     }
 
     public function edit(Hospital $hospital)
     {
-        return view('hospital.update', compact('hospital'));
+        return view('hospitals.edit', compact('hospital'));
     }
 
     public function update(Request $request, Hospital $hospital)
@@ -65,8 +72,13 @@ class HospitalController extends Controller
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'telepon' => 'required|string|max:15',
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('hospitals', 'email')->ignore($hospital->id),
+            ],
+            'telepon' => ['required', 'digits_between:8,15'],
         ], [
             'nama.required' => 'Nama pasien wajib diisi!',
             'nama.string' => 'Nama pasien harus berupa teks.',
@@ -79,10 +91,10 @@ class HospitalController extends Controller
             'email.required' => 'Email pasien wajib diisi!',
             'email.email' => 'Format email tidak valid.',
             'email.max' => 'Email pasien maksimal 255 karakter.',
+            'email.unique' => 'Email ini sudah digunakan.',
 
             'telepon.required' => 'Nomor telepon wajib diisi!',
-            'telepon.string' => 'Nomor telepon harus berupa teks/angka.',
-            'telepon.max' => 'Nomor telepon maksimal 15 karakter.',
+            'telepon.digits_between' => 'Nomor telepon harus berupa angka, antara 8 sampai 15 digit.',
         ]);
 
         if ($validator->fails()) {
@@ -102,10 +114,5 @@ class HospitalController extends Controller
             return response()->json(['status' => 'ok']);
         }
         return back()->with('ok', 'Data Rumah Sakit berhasil dihapus.');
-    }
-
-    public function show(Hospital $hospital)
-    {
-        return redirect()->route('hospitals.edit', $hospital);
     }
 }

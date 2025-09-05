@@ -17,20 +17,20 @@ class PatientController extends Controller
             $patients->where('hospital_id', $request->hospital_id);
         }
 
-        $patients = $patients->get();
+        $patients = $patients->paginate(10);
         $hospitals = Hospital::all();
 
         if ($request->ajax()) {
-            return view('patient.components.list', compact('patients'));
+            return view('patients.components.list', compact('patients'));
         }
 
-        return view('patient.index', compact('patients', 'hospitals'));
+        return view('patients.index', compact('patients', 'hospitals'));
     }
 
     public function create()
     {
         $hospitals = Hospital::all();
-        return view('patient.create', compact('hospitals'));
+        return view('patients.create', compact('hospitals'));
     }
 
     public function store(Request $request)
@@ -38,7 +38,7 @@ class PatientController extends Controller
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string|max:255',
-            'telepon' => 'required|string|max:15',
+            'telepon' => ['required', 'digits_between:8,15'],
             'hospital_id' => 'required|exists:hospitals,id',
         ], [
             'nama.required' => 'Nama pasien wajib diisi!',
@@ -50,8 +50,7 @@ class PatientController extends Controller
             'alamat.max' => 'Alamat pasien maksimal 255 karakter.',
 
             'telepon.required' => 'Nomor telepon wajib diisi!',
-            'telepon.string' => 'Nomor telepon harus berupa teks/angka.',
-            'telepon.max' => 'Nomor telepon maksimal 15 karakter.',
+            'telepon.digits_between' => 'Nomor telepon harus berupa angka, antara 8 sampai 15 digit.',
 
             'hospital_id.required' => 'Rumah sakit wajib dipilih!',
             'hospital_id.exists' => 'Rumah sakit yang dipilih tidak valid.',
@@ -66,13 +65,13 @@ class PatientController extends Controller
 
         Patient::create($validator->validated());
 
-        return redirect()->route('patients.index')->with('success', 'Data Pasien berhasil ditambahkan');
+        return redirect()->route('patients.index')->with('ok', 'Data Pasien berhasil ditambahkan');
     }
 
     public function edit(Patient $patient)
     {
         $hospitals = Hospital::all();
-        return view('patient.update', compact('patient', 'hospitals'));
+        return view('patients.edit', compact('patient', 'hospitals'));
     }
 
     public function update(Request $request, Patient $patient)
@@ -80,7 +79,7 @@ class PatientController extends Controller
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string|max:255',
-            'telepon' => 'required|string|max:15',
+            'telepon' => ['required', 'digits_between:8,15'],
             'hospital_id' => 'required|exists:hospitals,id',
         ], [
             'nama.required' => 'Nama pasien wajib diisi!',
@@ -92,8 +91,7 @@ class PatientController extends Controller
             'alamat.max' => 'Alamat pasien maksimal 255 karakter.',
 
             'telepon.required' => 'Nomor telepon wajib diisi!',
-            'telepon.string' => 'Nomor telepon harus berupa teks/angka.',
-            'telepon.max' => 'Nomor telepon maksimal 15 karakter.',
+            'telepon.digits_between' => 'Nomor telepon harus berupa angka, antara 8 sampai 15 digit.',
 
             'hospital_id.required' => 'Rumah sakit wajib dipilih!',
             'hospital_id.exists' => 'Rumah sakit yang dipilih tidak valid.',

@@ -15,9 +15,7 @@ class Hospital extends Model
         'email',
         'telepon',
     ];
-
-    // Relasi: satu Rumah Sakit punya banyak pasien
-    public function pasien()
+    public function patient()
     {
         return $this->hasMany(Patient::class);
     }
